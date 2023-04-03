@@ -1,0 +1,8 @@
+{
+    "apiKey": "<API KEY HERE>",
+    "regions": "us",
+    "markets": "h2h,spreads,totals",
+    "oddsFormat": "american",
+    "dateFormat": "iso",
+    "bookmakers": "betmgm,wynnbet,draftkings,fanduel,barstool"
+}
