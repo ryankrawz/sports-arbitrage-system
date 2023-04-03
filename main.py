@@ -1,5 +1,6 @@
 import json
 import requests
+import sys
 
 
 def check_for_market_inefficiency(event, book1, book2, market_type):
@@ -39,7 +40,8 @@ def check_for_market_inefficiency(event, book1, book2, market_type):
 
 def check_response(response, resource):
     if response.status_code != 200:
-        print(f'Failed to get {resource}:\nstatus code {response.status_code}\nresponse body {response.text}')
+        print(f'\n\n[ERROR] Failed to get {resource}:\nstatus code {response.status_code}\nresponse body {response.text}')
+        sys.exit()
 
 def get_active_sport_keys(config):
     sports_response = requests.get(
@@ -85,9 +87,12 @@ def scan_for_arbitrage_opportunities(config, sport):
         process_event_odds_matrix(event)
 
 def detect_arbitrage():
+    print('\nINITIATING ARBITRAGE DETECTION...')
     config_data = get_config()
     sport_keys = get_active_sport_keys(config_data)
+    print(f'Found {len(sport_keys)} sports listed as active.\n')
     for sport in sport_keys:
+        print(f'Scanning odds packages for sport: {sport}')
         scan_for_arbitrage_opportunities(config_data, sport)
 
 if __name__ == '__main__':
