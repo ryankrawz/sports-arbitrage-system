@@ -56,7 +56,7 @@ def get_active_sport_keys(config):
 
 def get_config():
     data = {}
-    with open('config.json') as f:
+    with open('v1/config.json') as f:
         data = json.load(f)
     return data
 
