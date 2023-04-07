@@ -1,1 +1,30 @@
-{}
+{
+    "browser": "Chrome",
+    "sports": ["football", "basketball", "hockey", "baseball"],
+    "books": [
+        {
+            "name": "Barstool",
+            "url": "https://www.barstoolsportsbook.com/",
+            "username": "<USERNAME HERE>",
+            "password": "<PASSWORD HERE>"
+        },
+        {
+            "name": "BetMGM",
+            "url": "https://sports.ma.betmgm.com/en/sports",
+            "username": "<USERNAME HERE>",
+            "password": "<PASSWORD HERE>"
+        },
+        {
+            "name": "DraftKings",
+            "url": "https://sportsbook.draftkings.com/featured",
+            "username": "<USERNAME HERE>",
+            "password": "<PASSWORD HERE>"
+        },
+        {
+            "name": "WynnBet",
+            "url": "https://bet.wynnbet.com/sports/us/sports/recommendations",
+            "username": "<USERNAME HERE>",
+            "password": "<PASSWORD HERE>"
+        }
+    ]
+}
