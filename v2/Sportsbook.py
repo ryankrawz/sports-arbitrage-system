@@ -1,4 +1,6 @@
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 
 
 class Sportsbook:
@@ -39,3 +41,14 @@ class Sportsbook:
     #       which typically means that get_moneyline_odds() has been called
     def place_moneyline_bet(self, favored: str, opponent: str, odds: int, amount: float) -> bool:
         raise NotImplementedError('Subclass must implement place_moneyline_bet()')
+    
+    def click_button(self, css_selector: str):
+        element = self.driver.find_element(By.CSS_SELECTOR, css_selector)
+        ActionChains(self.driver).click(element).perform()
+
+    def provide_input_to_element(self, css_selector: str, input: str):
+        element = self.driver.find_element(By.CSS_SELECTOR, css_selector)
+        action = ActionChains(self.driver)
+        action.click(on_element=element)
+        action.send_keys(input)
+        action.perform()

@@ -2,6 +2,8 @@ import importlib
 import json
 from Sportsbook import Sportsbook
 
+from Barstool import Barstool
+
 
 def get_book_inst(class_name: str, url: str, username: str, password: str, browser: str) -> Sportsbook:
     mod = importlib.import_module(class_name)
@@ -76,4 +78,8 @@ def detect_arbitrage():
                     compare_odds_data(book_i, book_j, sport)
 
 if __name__ == '__main__':
-    detect_arbitrage()
+    # detect_arbitrage()
+
+    book = Barstool('https://www.barstoolsportsbook.com/', 'ryankrawz', 'kdhue74&nfsH', 'Chrome')
+    login_success = book.login()
+    print(f'\nLogin success: {login_success}')

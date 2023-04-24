@@ -1,4 +1,4 @@
-import Sportsbook
+from Sportsbook import Sportsbook
 
 
 class Barstool(Sportsbook):
@@ -6,7 +6,14 @@ class Barstool(Sportsbook):
         super().__init__(url, username, password, browser)
 
     def login(self) -> bool:
-        pass
+        self.driver.get(self.url)
+        # Navigate to login page
+        self.click_button('span.logged-out')
+        # Enter credentials
+        self.provide_input_to_element('input[aria-label="USERNAME"]', self.username)
+        self.provide_input_to_element('input[aria-label="Password"]', self.password)
+        # Click "Log In" button
+        self.click_button('button[type="submit"]')
 
     def get_current_balance(self) -> float:
         pass
