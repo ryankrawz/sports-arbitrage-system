@@ -35,7 +35,9 @@ class Sportsbook(ABC):
         options.add_argument('--disable-blink-features=AutomationControlled')
         self.driver = webdriver.Chrome(options=options)
         # Rotating user agent to Chrome/83.0.4103.53 to also help avoid detection
-        self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'})
+        self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+            'userAgent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'
+        })
 
     def log_error_message(self, origin: str, e: Exception):
         errorStack = repr(e)
