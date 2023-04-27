@@ -22,7 +22,7 @@ class Sportsbook(ABC):
     # Element whose presence indicates successful login
     logged_in: str = None
 
-    def __init__(self, url: str, username: str, password: str):
+    def __init__(self, url: str, username: str, password: str, headless: bool = True):
         self.url = url
         self.username = username
         self.password = password
@@ -30,8 +30,9 @@ class Sportsbook(ABC):
         options = Options()
         # Maximize browser window to reduce chance of element being missed
         options.add_argument('start-maximized')
-        options.add_argument('--headless')
-        self.driver = webdriver.Chrome(chrome_options=options)
+        if headless:
+            options.add_argument('--headless')
+        self.driver = webdriver.Chrome(options=options)
 
     def log_error_message(self, origin: str, e: Exception):
         errorStack = repr(e)

@@ -1,12 +1,12 @@
 import importlib
 import json
-from Sportsbook import Sportsbook
+from v2.Sportsbook import Sportsbook
 
 
-def get_book_inst(class_name: str, url: str, username: str, password: str) -> Sportsbook:
-    mod = importlib.import_module(class_name)
+def get_book_inst(class_name: str, url: str, username: str, password: str, headless: bool = True) -> Sportsbook:
+    mod = importlib.import_module(f'v2.{class_name}')
     book_class = getattr(mod, class_name)
-    return book_class(url, username, password)
+    return book_class(url, username, password, headless)
 
 def get_config():
     data = {}
@@ -14,19 +14,27 @@ def get_config():
         data = json.load(f)
     return data
 
-def get_books(config_data: dict) -> 'list[Sportsbook]':
+def get_enabled_books(config_data: dict, headless: bool = True) -> 'list[Sportsbook]':
     books = []
     for book_config in config_data['books']:
         book_name = book_config['name']
         if book_config['enabled']:
-            print(f'Logging into {book_name}...')
-            book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'])
-            login_success = book.login()
-            if login_success:
-                books.append(book)
-                print(f'Successfully logged into {book_name}.\n')
-            else:
-                print(f'Failed to log into {book_name}! Skipping it in arbitrage detection.\n')
+            book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'], headless)
+            books.append(book)
+    return books
+
+def get_authenticated_books(config_data: dict) -> 'list[Sportsbook]':
+    enabled_books = get_enabled_books(config_data)
+    books = []
+    for book in enabled_books:
+        book_name = book.__class__.__name__
+        print(f'Logging into {book_name}...')
+        login_success = book.login()
+        if login_success:
+            books.append(book)
+            print(f'Successfully logged into {book_name}.\n')
+        else:
+            print(f'Failed to log into {book_name}! Skipping it in arbitrage detection.\n')
     return books
 
 def compare_odds_data(book1: Sportsbook, book2: Sportsbook, sport: str):
@@ -67,7 +75,7 @@ def compare_odds_data(book1: Sportsbook, book2: Sportsbook, sport: str):
 def detect_arbitrage():
     print('\nINITIATING ARBITRAGE DETECTION...\n')
     config_data = get_config()
-    books = get_books(config_data)
+    books = get_authenticated_books(config_data)
     for sport in config_data['sports']:
         print(f'Analyzing {sport} odds...')
         for i, book_i in enumerate(books):
