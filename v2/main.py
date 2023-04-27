@@ -14,7 +14,7 @@ def get_config():
         data = json.load(f)
     return data
 
-def get_books(config_data: dict) -> list:
+def get_books(config_data: dict) -> 'list[Sportsbook]':
     books = []
     for book_config in config_data['books']:
         book_name = book_config['name']
