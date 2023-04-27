@@ -1,4 +1,4 @@
-import Sportsbook
+from Sportsbook import Sportsbook
 
 
 class BetMGM(Sportsbook):
