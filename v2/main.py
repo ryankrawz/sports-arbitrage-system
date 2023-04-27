@@ -2,11 +2,13 @@ import importlib
 import json
 from Sportsbook import Sportsbook
 
+from Barstool import Barstool
 
-def get_book_inst(class_name: str, url: str, username: str, password: str, browser: str) -> Sportsbook:
+
+def get_book_inst(class_name: str, url: str, username: str, password: str) -> Sportsbook:
     mod = importlib.import_module(class_name)
     book_class = getattr(mod, class_name)
-    return book_class(url, username, password, browser)
+    return book_class(url, username, password)
 
 def get_config():
     data = {}
@@ -19,7 +21,7 @@ def get_books(config_data: dict) -> list:
     for book_config in config_data['books']:
         book_name = book_config['name']
         print(f'Logging into {book_name}...')
-        book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'], config_data['browser'])
+        book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'])
         login_success = book.login()
         if login_success:
             books.append(book)
@@ -74,6 +76,9 @@ def detect_arbitrage():
                 # No use comparing book to itself
                 if i != j:
                     compare_odds_data(book_i, book_j, sport)
+    # Spin down drivers for books
+    for book in books:
+        book.quit()
 
 if __name__ == '__main__':
     detect_arbitrage()
