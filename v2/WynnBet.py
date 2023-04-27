@@ -2,8 +2,8 @@ import Sportsbook
 
 
 class WynnBet(Sportsbook):
-    def __init__(self, url: str, username: str, password: str, browser: str):
-        super().__init__(url, username, password, browser)
+    def __init__(self, url: str, username: str, password: str):
+        super().__init__(url, username, password)
 
     def login(self) -> bool:
         pass

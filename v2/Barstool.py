@@ -2,18 +2,14 @@ from Sportsbook import Sportsbook
 
 
 class Barstool(Sportsbook):
-    def __init__(self, url: str, username: str, password: str, browser: str):
-        super().__init__(url, username, password, browser)
+    login_button = '//div[@aria-label="open login form"]'
+    username_field = '//input[@aria-label="USERNAME"]'
+    password_field = '//input[@aria-label="Password"]'
+    submit_login = '//button[@type="submit"]'
+    logged_in = '//div[@aria-label="account"]'
 
-    def login(self) -> bool:
-        self.driver.get(self.url)
-        # Navigate to login page
-        self.click_button('span.logged-out')
-        # Enter credentials
-        self.provide_input_to_element('input[aria-label="USERNAME"]', self.username)
-        self.provide_input_to_element('input[aria-label="Password"]', self.password)
-        # Click "Log In" button
-        self.click_button('button[type="submit"]')
+    def __init__(self, url: str, username: str, password: str):
+        super().__init__(url, username, password)
 
     def get_current_balance(self) -> float:
         pass
