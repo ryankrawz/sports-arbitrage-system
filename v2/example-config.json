@@ -3,24 +3,28 @@
     "books": [
         {
             "name": "Barstool",
+            "enabled": false,
             "url": "https://www.barstoolsportsbook.com/",
             "username": "<USERNAME HERE>",
             "password": "<PASSWORD HERE>"
         },
         {
             "name": "BetMGM",
+            "enabled": true,
             "url": "https://sports.ma.betmgm.com/en/sports",
             "username": "<USERNAME HERE>",
             "password": "<PASSWORD HERE>"
         },
         {
             "name": "DraftKings",
+            "enabled": false,
             "url": "https://sportsbook.draftkings.com/featured",
             "username": "<USERNAME HERE>",
             "password": "<PASSWORD HERE>"
         },
         {
             "name": "WynnBet",
+            "enabled": true,
             "url": "https://bet.wynnbet.com/sports/us/sports/recommendations",
             "username": "<USERNAME HERE>",
             "password": "<PASSWORD HERE>"

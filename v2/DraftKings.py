@@ -2,11 +2,14 @@ from Sportsbook import Sportsbook
 
 
 class DraftKings(Sportsbook):
+    login_button = '//a[@data-test-id="Log In-cta-link"]'
+    username_field = '//input[@id="login-username-input"]'
+    password_field = '//input[@id="login-password-input"]'
+    submit_login = '//button[@id="login-submit"]'
+    logged_in = '//div[@data-test-id="account-dropdown"]'
+
     def __init__(self, url: str, username: str, password: str):
         super().__init__(url, username, password)
-
-    def login(self) -> bool:
-        pass
 
     def get_current_balance(self) -> float:
         pass

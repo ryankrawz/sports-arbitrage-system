@@ -12,15 +12,15 @@ from selenium.webdriver.support.wait import WebDriverWait
 class Sportsbook(ABC):
     # XPATHS
     # Button to open login screen and enter credentials
-    login_button: str = ''
+    login_button: str = None
     # Input field for entering username
-    username_field: str = ''
+    username_field: str = None
     # Input field for entering password
-    password_field: str = ''
+    password_field: str = None
     # Button to submit credentials
-    submit_login: str = ''
+    submit_login: str = None
     # Element whose presence indicates successful login
-    logged_in: str = ''
+    logged_in: str = None
 
     def __init__(self, url: str, username: str, password: str):
         self.url = url
@@ -79,7 +79,7 @@ class Sportsbook(ABC):
     def place_moneyline_bet(self, favored: str, opponent: str, odds: int, amount: float) -> bool:
         pass
 
-    def quit(self):
+    def quit_session(self):
         self.driver.quit()
 
     def element_exists(self, xpath: str) -> bool:
@@ -100,7 +100,7 @@ class Sportsbook(ABC):
             )
         except Exception as e:
             self.log_error_message(f'wait_to_be_clickable({xpath})', e)
-            self.quit()
+            self.quit_session()
             raise e
     
     def click_button(self, xpath: str):
@@ -110,6 +110,15 @@ class Sportsbook(ABC):
     def provide_input_to_element(self, xpath: str, input: str):
         element = self.wait_to_be_clickable(xpath)
         action = ActionChains(self.driver)
-        action.click(on_element=element)
-        action.send_keys(input)
-        action.perform()
+        # Retry sending input since send_keys will intermittently fail
+        num_attempts = 0
+        while element.get_attribute('value') != input:
+            # Fail after 10 attempts
+            if num_attempts == 10:
+                self.log_error_message(f'provide_input_to_element({xpath})', Exception('Could not provide input to element after 10 attempts'))
+                self.quit_session()
+            action.click(on_element=element)
+            action.send_keys(input)
+            action.perform()
+            action.reset_actions()
+            num_attempts += 1

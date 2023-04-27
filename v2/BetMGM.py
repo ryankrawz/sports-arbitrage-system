@@ -2,11 +2,14 @@ from Sportsbook import Sportsbook
 
 
 class BetMGM(Sportsbook):
+    login_button = '//span[@data-testid="signin"]'
+    username_field = '//input[@name="username"]'
+    password_field = '//input[@name="password"]'
+    submit_login = '//button[contains(@class, "login")]'
+    logged_in = '//div[@class="account-menu-anchor"]'
+
     def __init__(self, url: str, username: str, password: str):
         super().__init__(url, username, password)
-
-    def login(self) -> bool:
-        pass
 
     def get_current_balance(self) -> float:
         pass

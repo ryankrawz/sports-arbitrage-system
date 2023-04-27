@@ -2,11 +2,14 @@ from Sportsbook import Sportsbook
 
 
 class WynnBet(Sportsbook):
+    login_button = '/html/body/app-root/div/app-header/header/div[2]/div/div/a[1]'
+    username_field = '//input[@id="username"]'
+    password_field = '//input[@id="password"]'
+    submit_login = '//button[@type="submit"]'
+    logged_in = '//a[@class="account-menu-button"]'
+
     def __init__(self, url: str, username: str, password: str):
         super().__init__(url, username, password)
-
-    def login(self) -> bool:
-        pass
 
     def get_current_balance(self) -> float:
         pass

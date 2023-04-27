@@ -2,8 +2,6 @@ import importlib
 import json
 from Sportsbook import Sportsbook
 
-from Barstool import Barstool
-
 
 def get_book_inst(class_name: str, url: str, username: str, password: str) -> Sportsbook:
     mod = importlib.import_module(class_name)
@@ -20,14 +18,15 @@ def get_books(config_data: dict) -> list:
     books = []
     for book_config in config_data['books']:
         book_name = book_config['name']
-        print(f'Logging into {book_name}...')
-        book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'])
-        login_success = book.login()
-        if login_success:
-            books.append(book)
-            print(f'Successfully logged into {book_name}.\n')
-        else:
-            print(f'Failed to log into {book_name}! Skipping it in arbitrage detection.\n')
+        if book_config['enabled']:
+            print(f'Logging into {book_name}...')
+            book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'])
+            login_success = book.login()
+            if login_success:
+                books.append(book)
+                print(f'Successfully logged into {book_name}.\n')
+            else:
+                print(f'Failed to log into {book_name}! Skipping it in arbitrage detection.\n')
     return books
 
 def compare_odds_data(book1: Sportsbook, book2: Sportsbook, sport: str):
@@ -78,7 +77,7 @@ def detect_arbitrage():
                     compare_odds_data(book_i, book_j, sport)
     # Spin down drivers for books
     for book in books:
-        book.quit()
+        book.quit_session()
 
 if __name__ == '__main__':
     detect_arbitrage()
