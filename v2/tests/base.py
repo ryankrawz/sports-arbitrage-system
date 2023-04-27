@@ -7,7 +7,7 @@ class TestBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config_data = get_config()
-        cls._enabled_books = get_enabled_books(config_data, headless=False)
+        cls._enabled_books = get_enabled_books(config_data)
 
     @classmethod
     def tearDownClass(cls):

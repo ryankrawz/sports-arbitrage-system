@@ -22,7 +22,7 @@ class Sportsbook(ABC):
     # Element whose presence indicates successful login
     logged_in: str = None
 
-    def __init__(self, url: str, username: str, password: str, headless: bool = True):
+    def __init__(self, url: str, username: str, password: str):
         self.url = url
         self.username = username
         self.password = password
@@ -30,9 +30,12 @@ class Sportsbook(ABC):
         options = Options()
         # Maximize browser window to reduce chance of element being missed
         options.add_argument('start-maximized')
-        if headless:
-            options.add_argument('--headless')
+        options.add_argument('--headless')
+        # Blink is Chromium's rendering engine and can be picked up by bot detection
+        options.add_argument('--disable-blink-features=AutomationControlled')
         self.driver = webdriver.Chrome(options=options)
+        # Rotating user agent to Chrome/83.0.4103.53 to also help avoid detection
+        self.driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'})
 
     def log_error_message(self, origin: str, e: Exception):
         errorStack = repr(e)

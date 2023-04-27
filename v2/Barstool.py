@@ -8,8 +8,8 @@ class Barstool(Sportsbook):
     submit_login = '//button[@type="submit"]'
     logged_in = '//div[@aria-label="account"]'
 
-    def __init__(self, url: str, username: str, password: str, headless: bool = True):
-        super().__init__(url, username, password, headless=headless)
+    def __init__(self, url: str, username: str, password: str):
+        super().__init__(url, username, password)
 
     def get_current_balance(self) -> float:
         pass

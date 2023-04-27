@@ -5,9 +5,4 @@ if [[ -z "$1" ]] ; then
     exit 1
 fi
 
-if [[ -z "$2" ]] ; then
-    echo "Must supply the test module, e.g. login"
-    exit 1
-fi
-
-python3 -m unittest $1/tests/$2.py
+python3 -m unittest discover -s $1/tests -p "*_test.py" -v

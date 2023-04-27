@@ -3,10 +3,10 @@ import json
 from v2.Sportsbook import Sportsbook
 
 
-def get_book_inst(class_name: str, url: str, username: str, password: str, headless: bool = True) -> Sportsbook:
+def get_book_inst(class_name: str, url: str, username: str, password: str) -> Sportsbook:
     mod = importlib.import_module(f'v2.{class_name}')
     book_class = getattr(mod, class_name)
-    return book_class(url, username, password, headless)
+    return book_class(url, username, password)
 
 def get_config():
     data = {}
@@ -14,12 +14,12 @@ def get_config():
         data = json.load(f)
     return data
 
-def get_enabled_books(config_data: dict, headless: bool = True) -> 'list[Sportsbook]':
+def get_enabled_books(config_data: dict) -> 'list[Sportsbook]':
     books = []
     for book_config in config_data['books']:
         book_name = book_config['name']
         if book_config['enabled']:
-            book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'], headless)
+            book = get_book_inst(book_name, book_config['url'], book_config['username'], book_config['password'])
             books.append(book)
     return books
 

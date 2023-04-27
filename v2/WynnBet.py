@@ -8,8 +8,8 @@ class WynnBet(Sportsbook):
     submit_login = '//button[@type="submit"]'
     logged_in = '//a[@class="account-menu-button"]'
 
-    def __init__(self, url: str, username: str, password: str, headless: bool = True):
-        super().__init__(url, username, password, headless=headless)
+    def __init__(self, url: str, username: str, password: str):
+        super().__init__(url, username, password)
 
     def get_current_balance(self) -> float:
         pass
