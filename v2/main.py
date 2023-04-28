@@ -34,6 +34,7 @@ def get_authenticated_books(config_data: dict) -> 'list[Sportsbook]':
             books.append(book)
             print(f'Successfully logged into {book_name}.\n')
         else:
+            book.quit_session()
             print(f'Failed to log into {book_name}! Skipping it in arbitrage detection.\n')
     return books
 

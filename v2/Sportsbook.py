@@ -10,7 +10,10 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 class Sportsbook(ABC):
+    #########
     # XPATHS
+    #########
+
     # Button to open login screen and enter credentials
     login_button: str = None
     # Input field for entering username
