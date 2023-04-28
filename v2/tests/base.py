@@ -1,6 +1,6 @@
 import unittest
 
-from v2.main import get_enabled_books, get_config
+from v2.main import get_config, get_enabled_books
 
 
 class TestBase(unittest.TestCase):

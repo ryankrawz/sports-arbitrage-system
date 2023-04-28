@@ -8,11 +8,10 @@ class BetMGM(Sportsbook):
     submit_login = '//button[contains(@class, "login")]'
     logged_in = '//div[@class="account-menu-anchor"]'
 
+    account_balance = '//div[contains(@class, "user-balance")]'
+
     def __init__(self, url: str, username: str, password: str):
         super().__init__(url, username, password)
-
-    def get_current_balance(self) -> float:
-        pass
 
     def get_moneyline_odds(self, sport: str) -> dict:
         pass

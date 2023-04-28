@@ -6,28 +6,32 @@
             "enabled": false,
             "url": "https://www.barstoolsportsbook.com/",
             "username": "<USERNAME HERE>",
-            "password": "<PASSWORD HERE>"
+            "password": "<PASSWORD HERE>",
+            "minimum": 0.1
         },
         {
             "name": "BetMGM",
             "enabled": true,
             "url": "https://sports.ma.betmgm.com/en/sports",
             "username": "<USERNAME HERE>",
-            "password": "<PASSWORD HERE>"
+            "password": "<PASSWORD HERE>",
+            "minimum": 0.5
         },
         {
             "name": "DraftKings",
             "enabled": false,
             "url": "https://sportsbook.draftkings.com/featured",
             "username": "<USERNAME HERE>",
-            "password": "<PASSWORD HERE>"
+            "password": "<PASSWORD HERE>",
+            "minimum": 0.1
         },
         {
             "name": "WynnBet",
             "enabled": true,
             "url": "https://bet.wynnbet.com/sports/us/sports/recommendations",
             "username": "<USERNAME HERE>",
-            "password": "<PASSWORD HERE>"
+            "password": "<PASSWORD HERE>",
+            "minimum": 0.1
         }
     ]
 }

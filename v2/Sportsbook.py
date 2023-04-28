@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from decimal import Decimal
+from re import sub
 
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -8,11 +10,16 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
+from v2.utils import element_text_matches_re
+
 
 class Sportsbook(ABC):
-    #########
-    # XPATHS
-    #########
+    # Number of seconds web driver will wait for element
+    POLL_TIMEOUT = 10
+
+    ##########
+    # XPATHS #
+    ##########
 
     # Button to open login screen and enter credentials
     login_button: str = None
@@ -24,6 +31,9 @@ class Sportsbook(ABC):
     submit_login: str = None
     # Element whose presence indicates successful login
     logged_in: str = None
+
+    # Contains the account balance
+    account_balance: str = None
 
     def __init__(self, url: str, username: str, password: str):
         self.url = url
@@ -60,9 +70,17 @@ class Sportsbook(ABC):
         return self.element_exists(self.logged_in)
 
     # Returns current account balance
-    @abstractmethod
-    def get_current_balance(self) -> float:
-        pass
+    def get_current_balance(self) -> Decimal:
+        try:
+            # Wait until nonzero balance is populated since some sites may set a default of 0
+            element = WebDriverWait(self.driver, self.POLL_TIMEOUT).until(
+                element_text_matches_re((By.XPATH, self.account_balance), r'[1-9]')
+            )
+            return Decimal(sub(r'[^\d.]', '', element.text))
+        except Exception as e:
+            self.log_error_message(f'get_current_balance()', e)
+            self.quit_session()
+            raise e
 
     # Parameter is one of the array items found in the "sports" field of config.json
     # Returns an object like the following (keys are the team mascots in lowercase):
@@ -93,7 +111,7 @@ class Sportsbook(ABC):
 
     def element_exists(self, xpath: str) -> bool:
         try:
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, self.POLL_TIMEOUT).until(
                 EC.presence_of_element_located((By.XPATH, xpath))
             )
             return True
@@ -103,8 +121,7 @@ class Sportsbook(ABC):
 
     def wait_to_be_clickable(self, xpath: str) -> WebElement:
         try:
-            # Wait 10 seconds maximum
-            return WebDriverWait(self.driver, 10).until(
+            return WebDriverWait(self.driver, self.POLL_TIMEOUT).until(
                 EC.element_to_be_clickable((By.XPATH, xpath))
             )
         except Exception as e:
@@ -126,6 +143,7 @@ class Sportsbook(ABC):
             if num_attempts == 10:
                 self.log_error_message(f'provide_input_to_element({xpath})', Exception('Could not provide input to element after 10 attempts'))
                 self.quit_session()
+                break
             action.click(on_element=element)
             action.send_keys(input)
             action.perform()
