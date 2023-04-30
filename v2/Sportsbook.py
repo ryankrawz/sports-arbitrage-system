@@ -35,6 +35,17 @@ class Sportsbook(ABC):
     # Contains the account balance
     account_balance: str = None
 
+    # Button for specific sport, with {sport} being the replacement field
+    sport_button: str = None
+    # Container for odds of single event
+    event_container: str = None
+    # Names of the event participants
+    event_participant_1: str = None
+    event_participant_2: str = None
+    # Moneyline odds on the event's participants
+    event_moneyline_odds_1: str = None
+    event_moneyline_odds_2: str = None
+
     def __init__(self, url: str, username: str, password: str):
         self.url = url
         self.username = username
@@ -52,10 +63,16 @@ class Sportsbook(ABC):
             'userAgent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'
         })
 
-    def log_error_message(self, origin: str, e: Exception):
+    def __log_error_message(self, origin: str, e: Exception):
         errorStack = repr(e)
         errorMessage = str(e)
         print(f'\n[ERROR] {origin}\n{errorStack}\n{errorMessage}')
+
+    def __generate_event_odds_obj(self, opponent_name: str, odds: WebElement) -> dict:
+        return {
+            'odds': self.additional_odds_processing(odds.text),
+            'opponent': opponent_name,
+        }
 
     # Returns a boolean indicating whether or not login was successful
     def login(self) -> bool:
@@ -78,7 +95,7 @@ class Sportsbook(ABC):
             )
             return Decimal(sub(r'[^\d.]', '', element.text))
         except Exception as e:
-            self.log_error_message(f'get_current_balance()', e)
+            self.__log_error_message(f'get_current_balance()', e)
             self.quit_session()
             raise e
 
@@ -94,9 +111,28 @@ class Sportsbook(ABC):
     #         'opponent': 'marlins'
     #     }
     # }
-    @abstractmethod
     def get_moneyline_odds(self, sport: str) -> dict:
-        pass
+        moneyline_odds = {}
+        # Select the sport
+        self.click_button(self.sport_button.format(sport=sport))
+        # Collect betting events
+        found_events = self.element_exists(self.event_container)
+        if found_events:
+            events = self.driver.find_elements(By.XPATH, self.event_container)
+            for event in events:
+                team_1 = event.find_element(By.XPATH, self.event_participant_1)
+                team_2 = event.find_element(By.XPATH, self.event_participant_2)
+                odds_1 = event.find_element(By.XPATH, self.event_moneyline_odds_1)
+                odds_2 = event.find_element(By.XPATH, self.event_moneyline_odds_2)
+                # Extract lowercase mascot name (exclude city)
+                team_1_name = team_1.text.split(' ')[-1].lower()
+                team_2_name = team_2.text.split(' ')[-1].lower()
+                moneyline_odds[team_1_name] = self.__generate_event_odds_obj(team_2_name, odds_1)
+                moneyline_odds[team_2_name] = self.__generate_event_odds_obj(team_1_name, odds_2)
+        else:
+            self.__log_error_message(f'get_moneyline_odds({sport})', Exception(f'Could not retrieve event list for {sport}'))
+            self.quit_session()
+        return moneyline_odds
 
     # Returns a boolean indicating whether or not bet was successfully placed
     # If false is returned, the likely cause is odds movement
@@ -105,6 +141,11 @@ class Sportsbook(ABC):
     @abstractmethod
     def place_moneyline_bet(self, favored: str, opponent: str, odds: int, amount: float) -> bool:
         pass
+
+    # Odds values from some books will need more handling
+    def additional_odds_processing(self, odds_value: str) -> int:
+        # Automatically handles strings with +/- signs
+        return int(odds_value)
 
     def quit_session(self):
         self.driver.quit()
@@ -116,7 +157,7 @@ class Sportsbook(ABC):
             )
             return True
         except Exception as e:
-            self.log_error_message(f'element_exists({xpath})', e)
+            self.__log_error_message(f'element_exists({xpath})', e)
             return False
 
     def wait_to_be_clickable(self, xpath: str) -> WebElement:
@@ -125,7 +166,7 @@ class Sportsbook(ABC):
                 EC.element_to_be_clickable((By.XPATH, xpath))
             )
         except Exception as e:
-            self.log_error_message(f'wait_to_be_clickable({xpath})', e)
+            self.__log_error_message(f'wait_to_be_clickable({xpath})', e)
             self.quit_session()
             raise e
     
@@ -141,7 +182,7 @@ class Sportsbook(ABC):
         while element.get_attribute('value') != input:
             # Fail after 10 attempts
             if num_attempts == 10:
-                self.log_error_message(f'provide_input_to_element({xpath})', Exception('Could not provide input to element after 10 attempts'))
+                self.__log_error_message(f'provide_input_to_element({xpath})', Exception('Could not provide input to element after 10 attempts'))
                 self.quit_session()
                 break
             action.click(on_element=element)

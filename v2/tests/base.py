@@ -7,6 +7,7 @@ class TestBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config_data = get_config()
+        cls._test_sport = config_data['sports'][0]
         cls._enabled_books = get_enabled_books(config_data)
 
     @classmethod
