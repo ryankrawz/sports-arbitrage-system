@@ -1,4 +1,4 @@
-from v2.Sportsbook import Sportsbook
+from books.Sportsbook import Sportsbook
 
 
 class DraftKings(Sportsbook):
@@ -12,4 +12,4 @@ class DraftKings(Sportsbook):
         super().__init__(url, username, password)
 
     def place_moneyline_bet(self, favored: str, opponent: str, odds: int, amount: float) -> bool:
-        pass
+        return True

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
-from re import sub
+import re
 
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -10,12 +10,16 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from v2.utils import element_text_matches_re
+from books.utils import element_text_matches_re
 
 
 class Sportsbook(ABC):
     # Number of seconds web driver will wait for element
     POLL_TIMEOUT = 10
+    # Anything other than a digit or "." character
+    NON_DECIMAL_EXP = re.compile(r'[^\d.]')
+    # Mascot term in team name (last word)
+    TEAM_NAME_EXP = re.compile(r'\s(\w+)\s*$')
 
     ##########
     # XPATHS #
@@ -47,6 +51,7 @@ class Sportsbook(ABC):
     event_moneyline_odds_2: str = None
 
     def __init__(self, url: str, username: str, password: str):
+        self.name = self.__class__.__name__
         self.url = url
         self.username = username
         self.password = password
@@ -66,7 +71,10 @@ class Sportsbook(ABC):
     def __log_error_message(self, origin: str, e: Exception):
         errorStack = repr(e)
         errorMessage = str(e)
-        print(f'\n[ERROR] {origin}\n{errorStack}\n{errorMessage}')
+        print(f'\n[ERROR] {self.name} {origin}\n{errorStack}\n{errorMessage}')
+
+    def __log_warning_message(self, origin: str, warning: str):
+        print(f'\n[WARNING] {self.name} {origin}\n{warning}')
 
     def __generate_event_odds_obj(self, opponent_name: str, odds: WebElement) -> dict:
         return {
@@ -93,7 +101,7 @@ class Sportsbook(ABC):
             element = WebDriverWait(self.driver, self.POLL_TIMEOUT).until(
                 element_text_matches_re((By.XPATH, self.account_balance), r'[1-9]')
             )
-            return Decimal(sub(r'[^\d.]', '', element.text))
+            return Decimal(self.NON_DECIMAL_EXP.sub('', element.text))
         except Exception as e:
             self.__log_error_message(f'get_current_balance()', e)
             self.quit_session()
@@ -119,16 +127,26 @@ class Sportsbook(ABC):
         found_events = self.element_exists(self.event_container)
         if found_events:
             events = self.driver.find_elements(By.XPATH, self.event_container)
+            invalid_event_counter = 0
             for event in events:
-                team_1 = event.find_element(By.XPATH, self.event_participant_1)
-                team_2 = event.find_element(By.XPATH, self.event_participant_2)
-                odds_1 = event.find_element(By.XPATH, self.event_moneyline_odds_1)
-                odds_2 = event.find_element(By.XPATH, self.event_moneyline_odds_2)
-                # Extract lowercase mascot name (exclude city)
-                team_1_name = team_1.text.split(' ')[-1].lower()
-                team_2_name = team_2.text.split(' ')[-1].lower()
-                moneyline_odds[team_1_name] = self.__generate_event_odds_obj(team_2_name, odds_1)
-                moneyline_odds[team_2_name] = self.__generate_event_odds_obj(team_1_name, odds_2)
+                try:
+                    team_1 = event.find_element(By.XPATH, self.event_participant_1)
+                    team_2 = event.find_element(By.XPATH, self.event_participant_2)
+                    odds_1 = event.find_element(By.XPATH, self.event_moneyline_odds_1)
+                    odds_2 = event.find_element(By.XPATH, self.event_moneyline_odds_2)
+                    # Extract lowercase mascot name (exclude city)
+                    team_1_name = self.TEAM_NAME_EXP.search(team_1.text).group(1).lower()
+                    team_2_name = self.TEAM_NAME_EXP.search(team_2.text).group(1).lower()
+                    moneyline_odds[team_1_name] = self.__generate_event_odds_obj(team_2_name, odds_1)
+                    moneyline_odds[team_2_name] = self.__generate_event_odds_obj(team_1_name, odds_2)
+                except:
+                    invalid_event_counter += 1
+            if invalid_event_counter > 0:
+                totalEvents = len(events)
+                self.__log_warning_message(
+                    f'get_moneyline_odds({sport})',
+                    f'{invalid_event_counter} event elements of {totalEvents} found in XPath were missing name and odds data for both teams:\n{self.event_container}'
+                )
         else:
             self.__log_error_message(f'get_moneyline_odds({sport})', Exception(f'Could not retrieve event list for {sport}'))
             self.quit_session()

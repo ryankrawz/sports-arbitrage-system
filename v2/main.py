@@ -1,10 +1,10 @@
 import importlib
 import json
-from v2.Sportsbook import Sportsbook
+from books.Sportsbook import Sportsbook
 
 
 def get_book_inst(class_name: str, url: str, username: str, password: str) -> Sportsbook:
-    mod = importlib.import_module(f'v2.{class_name}')
+    mod = importlib.import_module(f'books.{class_name}')
     book_class = getattr(mod, class_name)
     return book_class(url, username, password)
 
@@ -27,20 +27,17 @@ def get_authenticated_books(config_data: dict) -> 'list[Sportsbook]':
     enabled_books = get_enabled_books(config_data)
     books = []
     for book in enabled_books:
-        book_name = book.__class__.__name__
-        print(f'Logging into {book_name}...')
+        print(f'Logging into {book.name}...')
         login_success = book.login()
         if login_success:
             books.append(book)
-            print(f'Successfully logged into {book_name}.\n')
+            print(f'Successfully logged into {book.name}.\n')
         else:
             book.quit_session()
-            print(f'Failed to log into {book_name}! Skipping it in arbitrage detection.\n')
+            print(f'Failed to log into {book.name}! Skipping it in arbitrage detection.\n')
     return books
 
 def compare_odds_data(book1: Sportsbook, book2: Sportsbook, sport: str):
-    book1_name = book1.__class__.__name__
-    book2_name = book2.__class__.__name__
     odds1 = book1.get_moneyline_odds(sport)
     odds2 = book2.get_moneyline_odds(sport)
     for team in odds1.keys():
@@ -48,7 +45,7 @@ def compare_odds_data(book1: Sportsbook, book2: Sportsbook, sport: str):
         opponent = odds_obj['opponent']
         # Arbitrage opportunity possible if plus money for team A on book A is greater than
         # inverse minus money for team B on book B.
-        if odds2.has_key(opponent) and odds_obj['odds'] + odds2[opponent]['odds'] > 0:
+        if opponent in odds2 and odds_obj['odds'] + odds2[opponent]['odds'] > 0:
             price1 = odds_obj['odds']
             price2 = odds2[opponent]['odds']
             current_plus_money = price1 > 0
@@ -61,14 +58,14 @@ def compare_odds_data(book1: Sportsbook, book2: Sportsbook, sport: str):
             bet2 = minus_bet if current_plus_money else plus_bet
             book1_placed = book1.place_moneyline_bet(team, opponent, price1, bet1)
             book2_placed = book2.place_moneyline_bet(opponent, team, price2, bet2)
-            print('\n-------------------------------------------------')
+            print('\n[SUCCESS] ---------------------------------------')
             print(f'Discovered arbitrage opportunity for the event between the {team} and {opponent}:')
-            print(f'{book1_name} --> {team} {price1} (betting ${bet1:.2f})')
-            print(f'{book2_name} --> {opponent} {price2} (betting ${bet2:.2f})')
+            print(f'{book1.name} --> {team} {price1} (betting ${bet1:.2f})')
+            print(f'{book2.name} --> {opponent} {price2} (betting ${bet2:.2f})')
             if not book1_placed:
-                print(f'\nFailed to place bet for ${book1_name}! It\'s likely that the odds moved.')
+                print(f'\nFailed to place bet for ${book1.name}! It\'s likely that the odds moved.')
             elif not book2_placed:
-                print(f'\nFailed to place bet for ${book2_name}! It\'s likely that the odds moved.')
+                print(f'\nFailed to place bet for ${book2.name}! It\'s likely that the odds moved.')
             else:
                 print(f'\nSuccessfully placed bet!')
             print('-------------------------------------------------\n')
@@ -78,7 +75,7 @@ def detect_arbitrage():
     config_data = get_config()
     books = get_authenticated_books(config_data)
     for sport in config_data['sports']:
-        print(f'Analyzing {sport} odds...')
+        print(f'\nAnalyzing {sport} odds...')
         for i, book_i in enumerate(books):
             for j, book_j in enumerate(books):
                 # No use comparing book to itself

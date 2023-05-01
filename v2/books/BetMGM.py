@@ -1,4 +1,4 @@
-from v2.Sportsbook import Sportsbook
+from books.Sportsbook import Sportsbook
 
 
 class BetMGM(Sportsbook):
@@ -21,12 +21,15 @@ class BetMGM(Sportsbook):
         super().__init__(url, username, password)
 
     def additional_odds_processing(self, odds_value: str) -> int:
-        # MGM sends total return on bet, so if odds on bet were +150, value is 2.5
-        odds_float = float(odds_value)
-        if odds_float < 2:
-            return -round((1 / (odds_float - 1)) * 100)
-        else:
-            return round((odds_float - 1) * 100)
+        # MGM sometimes sends total return on bet, so if odds on bet were +150, value is 2.5
+        try:
+            return int(odds_value)
+        except:
+            odds_float = float(odds_value)
+            if odds_float < 2:
+                return -round((1 / (odds_float - 1)) * 100)
+            else:
+                return round((odds_float - 1) * 100)
 
     def place_moneyline_bet(self, favored: str, opponent: str, odds: int, amount: float) -> bool:
-        pass
+        return True
