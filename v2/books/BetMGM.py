@@ -11,6 +11,8 @@ class BetMGM(Sportsbook):
     account_balance = '//div[contains(@class, "user-balance")]'
 
     sport_button = '//a[contains(@href, "/en/sports/{sport}")]'
+    # Currently translates B, H, F to lowercase for Basketball, Baseball, Hockey, Football
+    sport_selected = '//span[contains(@class, "breadcrumb-title") and translate(text(), "BHF", "bhf")="{sport}"]'
     event_container = '//ms-tabbed-grid-widget[1]/ms-grid/div/ms-event-group/ms-six-pack-event'
     event_participant_1 = './div/a/ms-event-detail/ms-event-name/ms-inline-tooltip/div/div[1]/div/div'
     event_participant_2 = './div/a/ms-event-detail/ms-event-name/ms-inline-tooltip/div/div[2]/div/div'

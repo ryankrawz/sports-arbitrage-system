@@ -41,6 +41,8 @@ class Sportsbook(ABC):
 
     # Button for specific sport, with {sport} being the replacement field
     sport_button: str = None
+    # Indicator that correct sport has successfully been clicked
+    sport_selected: str = None
     # Container for odds of single event
     event_container: str = None
     # Names of the event participants
@@ -58,7 +60,7 @@ class Sportsbook(ABC):
         # Requires Chrome web driver to run headless
         options = Options()
         # Maximize browser window to reduce chance of element being missed
-        options.add_argument('start-maximized')
+        options.add_argument('--window-size=1920,1080')
         options.add_argument('--headless')
         # Blink is Chromium's rendering engine and can be picked up by bot detection
         options.add_argument('--disable-blink-features=AutomationControlled')
@@ -135,8 +137,8 @@ class Sportsbook(ABC):
         # Select the sport
         self.click_button(self.sport_button.format(sport=sport))
         # Collect betting events
-        found_events = self.element_exists(self.event_container)
-        if found_events:
+        sport_clicked = self.element_exists(self.sport_selected.format(sport=sport))
+        if sport_clicked:
             events = self.driver.find_elements(By.XPATH, self.event_container)
             invalid_event_counter = 0
             for event in events:
