@@ -18,6 +18,10 @@ class WynnBet(Sportsbook):
     event_moneyline_odds_1 = './div[1]/div/div[1]/div[2]/div[2]/div/div[1]/button/span/span'
     event_moneyline_odds_2 = './div[1]/div/div[1]/div[2]/div[2]/div/div[2]/button/span/span'
 
+    # Hockey XPaths differ from others
+    event_participant_1__hockey = './div[1]/div/div[1]/div[1]/div/div/div[1]/div'
+    event_participant_2__hockey = './div[1]/div/div[1]/div[1]/div/div/div[2]/div'
+
     def __init__(self, url: str, username: str, password: str):
         super().__init__(url, username, password)
 

@@ -18,8 +18,8 @@ class Sportsbook(ABC):
     POLL_TIMEOUT = 10
     # Anything other than a digit or "." character
     NON_DECIMAL_EXP = re.compile(r'[^\d.]')
-    # Mascot term in team name (last word)
-    TEAM_NAME_EXP = re.compile(r'\s(\w+)\s*$')
+    # One or more whitespace characters
+    WHITESPACE_EXP = re.compile(r'\s+')
 
     ##########
     # XPATHS #
@@ -81,6 +81,17 @@ class Sportsbook(ABC):
             'odds': self.additional_odds_processing(odds.text),
             'opponent': opponent_name,
         }
+    
+    # If no property has a sport extension (e.g. "__hockey"), then there are no
+    # custom XPaths and the default one can be returned.
+    def __get_custom_xpath_attr(self, attr_root: str, num: int, sport: str) -> str:
+        return getattr(self, f'{attr_root}_{num}__{sport}', getattr(self, f'{attr_root}_{num}'))
+    
+    # Extract lowercase mascot name (exclude city)
+    def __parse_team_name(self, name_str: str) -> str:
+        words = self.WHITESPACE_EXP.split(name_str.strip().lower())
+        # Special case for Red/White Sox since last word of mascot name is the same
+        return words[-2] + words[-1] if words[-1] == 'sox' else words[-1]
 
     # Returns a boolean indicating whether or not login was successful
     def login(self) -> bool:
@@ -130,13 +141,13 @@ class Sportsbook(ABC):
             invalid_event_counter = 0
             for event in events:
                 try:
-                    team_1 = event.find_element(By.XPATH, self.event_participant_1)
-                    team_2 = event.find_element(By.XPATH, self.event_participant_2)
-                    odds_1 = event.find_element(By.XPATH, self.event_moneyline_odds_1)
-                    odds_2 = event.find_element(By.XPATH, self.event_moneyline_odds_2)
+                    team_1 = event.find_element(By.XPATH, self.__get_custom_xpath_attr('event_participant', 1, sport))
+                    team_2 = event.find_element(By.XPATH, self.__get_custom_xpath_attr('event_participant', 2, sport))
+                    odds_1 = event.find_element(By.XPATH, self.__get_custom_xpath_attr('event_moneyline_odds', 1, sport))
+                    odds_2 = event.find_element(By.XPATH, self.__get_custom_xpath_attr('event_moneyline_odds', 2, sport))
                     # Extract lowercase mascot name (exclude city)
-                    team_1_name = self.TEAM_NAME_EXP.search(team_1.text).group(1).lower()
-                    team_2_name = self.TEAM_NAME_EXP.search(team_2.text).group(1).lower()
+                    team_1_name = self.__parse_team_name(team_1.text)
+                    team_2_name = self.__parse_team_name(team_2.text)
                     moneyline_odds[team_1_name] = self.__generate_event_odds_obj(team_2_name, odds_1)
                     moneyline_odds[team_2_name] = self.__generate_event_odds_obj(team_1_name, odds_2)
                 except:
